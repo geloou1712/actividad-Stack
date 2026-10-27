@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 
@@ -14,21 +15,27 @@ import java.util.Stack;
 @RequestMapping("/pila")
 public class PilaController {
 
-    @PostMapping
-    public String agregar(@RequestParam String valor) {
+    private final Stack<String> teclas = new Stack<>();
 
-        return "Se agrego: " + valor;
+    @PostMapping
+    public synchronized String agregar(@RequestParam String valor) {
+        teclas.push(valor);
+        return "Se agregó: " + valor;
     }
 
     @GetMapping("/pop")
-    public String sacar() {
+    public synchronized String sacar() {
+        if (teclas.empty()) {
+            return "La pila está vacía";
+        }
 
-        return "La pila esta vacia";
+        return "Se sacó: " + teclas.pop();
     }
 
     @GetMapping
-    public List<String> verPila() {
-
-        return new ArrayList<>();
+    public synchronized List<String> verPila() {
+        List<String> resultado = new ArrayList<>(teclas);
+        Collections.reverse(resultado); // La tecla más reciente aparece primero
+        return resultado;
     }
 }
